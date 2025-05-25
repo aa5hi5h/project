@@ -8,6 +8,8 @@ import { SignUpButton } from "./sign-up-button"
 import Modal from "../ui/modals/modal"
 import { AuthContent } from "./auth-content"
 import { Avatar } from "./avatar"
+import { Notification } from "./notification"
+import { Submit } from "./submit"
 
 interface NavbarProp{
     user: any
@@ -33,7 +35,10 @@ const Navbar = ({user}:NavbarProp) => {
             </div>
             {
                 user ? 
-                <div><Avatar authenticatedUser={user} /></div> :
+                <div className="flex space-x-6">
+                    <Submit />
+                    <Notification />
+                    <Avatar authenticatedUser={user} /></div> :
 
                 <div
             onClick={handleButtonClick}
