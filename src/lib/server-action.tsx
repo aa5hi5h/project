@@ -77,3 +77,24 @@ export const createProduct = async({
         return null
     }
 }
+
+export const getProducts = async() => {
+
+
+    const authenticatedUser = await auth()
+
+    if(!authenticatedUser){
+        throw new Error("User is not logged in")
+    }
+
+    const userId = authenticatedUser.user?.id
+
+    const products = await db.product.findMany({
+        where:{
+            userId
+        }
+    })
+
+    return products
+
+}

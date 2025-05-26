@@ -7,9 +7,10 @@ import { Separator } from "@/components/ui/separator";
 import { createProduct } from "@/lib/server-action";
 import { useClose } from "@headlessui/react";
 import { format } from "date-fns";
-import { Calendar, Gamepad2, Rss, Twitter } from "lucide-react";
+import { Calendar, Gamepad2, Rss, Twitter, X } from "lucide-react";
 import Image from "next/image";
 import {  useCallback, useState } from "react"
+import { toast } from "sonner";
 
 
 const categories = [
@@ -96,6 +97,103 @@ const NewProduct = () => {
 
 
     const nextStep = useCallback(() => {
+        if(step === 1 && name.length < 4){
+            toast(
+                <>
+                <div className="flex bg-white items-center gap-4 mx-auto">
+                    <X className="text-red-600" />
+                    <div>Please enter atleast 4 character</div>
+                </div>
+                </>,
+                {position: "top-center"}
+            );
+            return
+        }
+        if(step === 2 && selectedCategories.length < 3){
+            toast(
+                <>
+                <div className="flex items-center gap-4 mx-auto">
+                    <X className="text-red-600" />
+                    <div>Please select atleast 3 categories</div>
+                </div>
+                </>,
+                {position:"top-center"}
+            );
+            return
+        }
+        if(step === 3 && headline.length < 10){
+            toast(
+                <>
+                <div className="flex items-center gap-4 mx-auto">
+                    <X className="text-red-600" />
+                    <div>Please enter atleast 10 characters for the headline</div>
+                </div>
+                </>,
+                {position:"top-center"}
+            );
+            return
+        }
+        if(step === 3 && description.length < 20){
+            toast(
+                <>
+                <div className="flex items-center gap-4 mx-auto">
+                    <X className="text-red-600" />
+                    <div>Please enter atleast 20 characters for the description</div>
+                </div>
+                </>,
+                {position:"top-center"}
+            );
+            return
+        }
+        if(step === 4 && !uploadedLogoUrl){
+            toast(
+                <>
+                <div className="flex items-center gap-4 mx-auto">
+                    <X className="text-red-600" />
+                    <div>Please select product logo before continuing</div>
+                </div>
+                </>,
+                {position:"top-center"}
+            );
+            return
+        }
+        if(step===4 && uploadedImagesUrl.length < 3){
+            toast(
+                <>
+                <div className="flex items-center mx-auto gap-4">
+                    <X className="text-red-600" />
+                    <div>Please select atleast 3 product images before continuing</div>
+                </div>
+                </>,
+                {
+                    position:"top-center"
+                }
+            );
+            return
+        }
+        if(step ===5 && !date){
+            toast(
+                <>
+                <div className="flex items-center mx-auto gap-4">
+                    <X  className="text-red-600"/>
+                    <div>Please select a date before continue</div>
+                    </div></>,
+                    {position:"top-center"}
+            );
+            return
+        }
+        if(step===6 && !website && !twitter && !discord){
+            toast(
+                <>
+                <div className="flex items-center gap-4 mx-auto">
+                    <X className="text-red-600" />
+                    <div>Please enter atleast one link</div>
+                    </div>
+                    </>,
+                    {position:"top-center"}
+            );
+            return
+        }
         setStep(step + 1 )
     },[step])
 
