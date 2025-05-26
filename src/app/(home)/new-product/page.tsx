@@ -3,8 +3,9 @@ import { Button } from "@/components/ui/button";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { LogoUploader } from "@/components/ui/logo-uploader";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { useClose } from "@headlessui/react";
 import { format } from "date-fns";
-import { Calendar } from "lucide-react";
+import { Calendar, Gamepad2, Rss, Twitter } from "lucide-react";
 import Image from "next/image";
 import {  useCallback, useState } from "react"
 
@@ -49,7 +50,9 @@ const NewProduct = () => {
     const[uploadedLogoUrl,setUploadedLogoUrl] = useState<string>("")
     const[uploadedImagesUrl,setUploadImagesUrl] = useState<string[]>([])
     const [date,setDate] = useState<Date | undefined>(new Date())
-
+    const [website,setWebsite] = useState<string>("")
+    const [twitter,setTwitter] = useState<string>("")
+    const [discord,setDiscord] = useState<string>("")
 
 
 
@@ -92,6 +95,10 @@ const NewProduct = () => {
 
     const nextStep = useCallback(() => {
         setStep(step + 1 )
+    },[step])
+
+    const prevStep = useCallback(() => {
+        setStep(step-1)
     },[step])
 
 
@@ -251,9 +258,126 @@ const NewProduct = () => {
                 </div>
             </div>
         )}
-        <button onClick={nextStep} className=" mt-10 bg-[#ff6154] text-white py-2 px-4 rounded-full">
-            Continue
-        </button>
+        {step == 6 && (
+            <div className="space-y-10">
+                <h2 className="text-4xl font-bold tracking-tight">Additional links</h2>
+                <p className="text-xl font-light leading-8">Add links to your product&apos;s website, social media , and other platform.</p>
+                <div className="">
+                    <div className="flex items-center gap-x-2">
+                    <Rss className="h-8 w-8 opacity-70" />
+                    <h2 className="font-medium">Website</h2>
+                    </div>
+                    <input 
+                    type="text"
+                    placeholder="https://www-your-domain-name/"
+                    value={website}
+                    className="p-2 border rounded-md mt-2 w-full focus:outline-none"
+                    onChange={(e) => setWebsite(e.target.value)} />
+                </div>
+                <div className="">
+                    <div className="flex gap-x-2 items-center">
+                    <Twitter className="h-8 w-8 opacity-70" />
+                    <h2 className="font-medium">Twitter</h2>
+                    </div>
+                    <input
+                    type="text"
+                    placeholder="https://twitter.com"
+                    value={twitter}
+                    onChange={(e) => setTwitter(e.target.value)}
+                    className="p-2 border rounded-md w-full mt-2 focus:outline-none" />
+                </div>
+                <div className="">
+                    <div className="flex items-center gap-x-2">
+                    <Gamepad2 className="h-8 w-8 opacity-70" />
+                    <h2 className="font-medium">Discord</h2>
+                    </div>
+                    <input 
+                    type="text"
+                    placeholder="https://discord.com"
+                    value={discord}
+                    onChange={(e) => setDiscord(e.target.value) }
+                    className="p-2 mt-2 border rounded-lg w-full focus:outline-none" />
+                </div>
+            </div>
+        )}
+        { step == 7 && (
+            <div className="space-y-10">
+                <h2 className="text-4xl font-bold tracking-tight">Review and submit</h2>
+                <p className="text-xl font-light leading-8">Review the details of your product and submit it to the world.
+            Your product will be reviewed by our team before it goes live.</p>
+            <div className="grid grid-cols-2 gap-8">
+                <div>
+                    <div className="font-medium">Name of the product</div>
+                    <div className="text-gray-600 mt-2">{name}</div>
+                </div>
+                <div>
+                    <div className="font-medium">Slug (URL)</div>
+                    <div className="text-gray-600 mt-2">{slug}</div>
+                </div>
+                <div>
+                    <div className="font-medium">Category</div>
+                    <div className="flex gap-x-2 mt-2 items-center ">
+                    {selectedCategories.map((item,idx) => (
+                        <div className="text-gray-600" key={idx}>{item}</div>
+                    ))}
+                    </div>
+                </div>
+                <div>
+                    <div className="font-medium">Website URL</div>
+                    <div className="text-gray-600 mt-2">{website}</div>
+                </div>
+                <div>
+                    <div className="font-medium">Headline</div>
+                    <div className="text-gray-600 mt-2">{headline}</div>
+                </div>
+                <div>
+                    <div className="font-medium">Description</div>
+                    <div className="text-gray-600 mt-2">{description}</div> 
+                </div>
+                <div>
+                    <div className="font-medium">Twitter</div>
+                    <div className="text-gray-600 mt-2">{twitter}</div>
+                </div>
+                <div>
+                    <div className="font-medium">Discord</div>
+                    <div className="text-gray-600 mt-2 ">{discord}</div>
+                </div>
+                <div>
+                    <div className="font-medium">Release Date</div>
+                    <div className="text-gray-600 mt-2">{date ? date.toDateString() : "not specified"}</div> 
+                </div>
+                <div>
+                    <div className="font-medium">Product Images</div>
+                    <div className="flex gap-x-2 max-w-max mt-2 items-center">
+                        {uploadedImagesUrl.map((img,idx) => (
+                            <Image
+                            src={img}
+                            objectFit="cover"
+                            key={idx}
+                            alt="product image"
+                             width={800}
+                             height={800}
+                            className="rounded-md h-24 w-24" />
+                        ))}
+                    </div>
+                </div>
+                </div>
+            </div>
+        ) }
+        { step !== 8 && (
+            <div className="flex mt-10 items-center justify-between">
+                {step !== 1 && (
+                    <button onClick={prevStep}>
+                        Previous
+                    </button>
+                )}
+                <div>
+                    {step === 7 
+                    ? <button className="bg-red-600 py-2 rounded-full px-4 text-white hover:bg-red-400 ">Submit</button>
+                     : <button onClick={nextStep} className="bg-red-600 py-2 px-4 text-white rounded-full hover:bg-red-400">Next</button>}
+                </div>
+            </div>
+        )}
         </div>
     </div>
     )
