@@ -52,7 +52,7 @@ model User {
   image         String?
   accounts      Account[]
   sessions      Session[]
- 
+  products      Product[]
   @@map("users")
 }
  
@@ -63,4 +63,48 @@ model VerificationToken {
  
   @@unique([identifier, token])
   @@map("verification_tokens")
+}
+
+model Product {
+  id String @id @default(cuid())
+  name String
+  slug String
+  headline String
+  description String
+  releaseDate String
+  logo String
+  website String
+  twitter String
+  discord String
+  categories Category[]
+  images Image[]
+  user User @relation( fields: [userId] ,references: [id])
+  userId String 
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  status Status @default(PENDING)
+}
+
+model Image {
+  id String @id @default(cuid())
+  url String
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  @@index([productId])
+}
+
+
+model Category {
+  id String @id @default( cuid())
+  name String @unique
+  products Product[]
+}
+
+enum Status {
+  PENDING
+  ACTIVE 
+  REJECTED
 }

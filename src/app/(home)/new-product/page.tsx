@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { ImageUploader } from "@/components/ui/image-uploader";
 import { LogoUploader } from "@/components/ui/logo-uploader";
 import { Popover, PopoverTrigger } from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
+import { createProduct } from "@/lib/server-action";
 import { useClose } from "@headlessui/react";
 import { format } from "date-fns";
 import { Calendar, Gamepad2, Rss, Twitter } from "lucide-react";
@@ -53,7 +55,7 @@ const NewProduct = () => {
     const [website,setWebsite] = useState<string>("")
     const [twitter,setTwitter] = useState<string>("")
     const [discord,setDiscord] = useState<string>("")
-
+    const [loading,setLoading] = useState<boolean>(false)
 
 
     const handleNameChange = (e:any) => {
@@ -101,6 +103,48 @@ const NewProduct = () => {
         setStep(step-1)
     },[step])
 
+
+    const SubmitAnotherProduct = () => {
+        setStep(1)
+        setDate(new Date())
+        setDescription("")
+        setDiscord("")
+        setHeadline("")
+        setName("")
+        setSelectedCategories([])
+        setSlug("")
+        setTwitter("")
+        setUploadedLogoUrl("")
+        setUploadImagesUrl([])
+        setWebsite("")
+    }
+
+    const HanldeSubmitAction = async() => {
+        setLoading(true)
+        const formattedDate = date ? format(date, "dd/MM/yyyy") : ""
+
+        try{
+            await createProduct({
+                name,
+                slug,
+                description,
+                headline,
+                twitter,
+                discord,
+                website,
+                logo: uploadedLogoUrl,
+                categories: selectedCategories,
+                images: uploadedImagesUrl,
+                releaseDate: formattedDate
+            })
+            setStep(8)
+            
+        }catch(error){
+            console.log("ERROR WHILE CREATING PRODUCT::::",error)
+            setLoading(false)
+        }
+
+    }
 
     return (
     <div className="flex items-center justify-between py-8 md:py-20">
@@ -250,7 +294,8 @@ const NewProduct = () => {
                             className={`w-[300px] pl-3 text-left font-normal ${!date && "text-muted-foreground"}`}
                             >
                                 {date ? format(date,"PPP") : <>Pick a date</>}
-                                <Calendar className="ml-auto h-4 w-4 opacity-50" />
+                                <Calendar
+                                 className="ml-auto h-4 w-4 opacity-50" />
                             </Button>
                         </PopoverTrigger>
                     </Popover>
@@ -364,6 +409,29 @@ const NewProduct = () => {
                 </div>
             </div>
         ) }
+
+        {step == 8 && (
+            <div className="space-y-10">
+                <div className="text-4xl font-semibold tracking-tight">Congratulations</div>
+                <p className="text-xl font-light leading-8">
+                    Your product has been successfully submitted. Our team will 
+                    review it and get back to you soon.
+                </p>
+                <div className="flex flex-col gap-4">
+                    <div 
+                    onClick={() => window.location.href="/my-product"}
+                    className="bg-red-600 text-white py-2 px-4 rounded flex items-center justify-center">
+                        Go to your product
+                    </div>
+                    <Separator />
+                    <div
+                    onClick={SubmitAnotherProduct} 
+                    className="text-red-600 cursor-pointer hover:text-red-400">
+                        Submit another product
+                    </div>
+                </div>
+            </div>
+        )}
         { step !== 8 && (
             <div className="flex mt-10 items-center justify-between">
                 {step !== 1 && (
@@ -373,7 +441,7 @@ const NewProduct = () => {
                 )}
                 <div>
                     {step === 7 
-                    ? <button className="bg-red-600 py-2 rounded-full px-4 text-white hover:bg-red-400 ">Submit</button>
+                    ? <button onClick={HanldeSubmitAction} className="bg-red-600 py-2 rounded-full px-4 text-white hover:bg-red-400 ">Submit</button>
                      : <button onClick={nextStep} className="bg-red-600 py-2 px-4 text-white rounded-full hover:bg-red-400">Next</button>}
                 </div>
             </div>
