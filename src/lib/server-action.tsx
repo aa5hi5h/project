@@ -98,3 +98,79 @@ export const getProducts = async() => {
     return products
 
 }
+
+export const updateProduct = async(productId:string,{
+    name,
+    slug,
+    headline,
+    description,
+    twitter,
+    discord,
+    website,
+    releaseDate,
+    logo,
+    images
+}:ProductData) => {
+
+    const authenticatedUser = await auth()
+
+    if(!authenticatedUser){
+        throw new Error("You need to be authenticated before updating product details")
+    }
+
+    const product = await db.product.findUnique({
+        where:{
+            id:productId
+        }
+    })
+    if(!product){
+        throw new Error("Product not found")
+    }
+
+    const updatedProduct = await db.product.update({
+        where:{
+            id:productId
+        },
+        data:{
+            name,
+            slug,
+            headline,
+            description,
+            twitter,
+            discord,
+            website,
+            releaseDate,
+            logo,
+            images:{
+                deleteMany:{
+                    productId
+                },
+                createMany:{
+                    data: images.map((image) => ({url:image}))
+                }
+            },
+            status:"PENDING"
+        }
+    });
+    return updatedProduct
+}
+
+
+export const getProductById = async(productId:string) => {
+    try{
+        const product = await db.product.findUnique({
+            where:{
+                id:productId
+            },
+            include:{
+                categories: true,
+                images: true
+            }
+        })
+
+        return product
+    }catch(error){
+        console.log("ERROR::::",error)
+        return null
+    }
+}
