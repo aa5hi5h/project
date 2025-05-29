@@ -155,6 +155,39 @@ export const updateProduct = async(productId:string,{
     return updatedProduct
 }
 
+export const deleteProduct = async(productId:string) => {
+    
+    const authenticatedUser = await auth()
+
+    if(!authenticatedUser || !authenticatedUser.user || !authenticatedUser.user.id){
+        throw new Error("You need to be authenticated to perform this action")
+    }
+
+
+    const product = await db.product.findUnique({
+        where:{
+            id: productId
+        }
+    })
+
+    if(!product || product.userId !== authenticatedUser.user.id){
+        throw new Error("There is no such product you want to delete")
+    }
+
+    await db.product.delete({
+        where:{
+            id:productId
+        },
+        include:{
+            images:true
+        }
+    })
+
+    return true
+
+
+}
+
 
 export const getProductById = async(productId:string) => {
     try{

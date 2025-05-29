@@ -57,7 +57,7 @@ const ProductIdPage  = async({params}:{params:ProductIdParams}) => {
 
                     <div className="flex items-center gap-4">
                         <EditProduct product={product} />
-                        <DeleteProduct />
+                        <DeleteProduct productId={product.id} />
                     </div>
 
                 </div>
