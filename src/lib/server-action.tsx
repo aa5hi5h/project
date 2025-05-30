@@ -255,3 +255,35 @@ export const activateProduct = async(productId:string) => {
     })
     return product
 }
+
+export const rejectedProducts = async(productId:string, reason:string) => {
+    const product = await db.product.findUnique({
+        where:{
+            id:productId
+        }
+    })
+
+    if(!product){
+        throw new Error("There is no product found")
+    }
+
+    await db.product.update({
+        where:{
+            id:productId
+        },
+        data:{
+            status: "REJECTED"
+        }
+    })
+
+    await db.notification.create({
+        data:{
+            userId: product.userId,
+            body: `Your ${product.name} has been rejected due to ${reason} `,
+            profilePicture: product.logo,
+            productId: product.id,
+            type: "REJECTED",
+            status: "UNREAD"
+        }
+    })
+}

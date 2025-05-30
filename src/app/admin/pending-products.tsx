@@ -145,7 +145,10 @@ const PendingProducts : React.FC<PendingProductsProps> = ({pendingProducts,authe
                 <RejectProductModal 
                 visible={rejectedProductModalVisible}
                 setVisible={setRejectProductModalVisible}>
-                    <RejectProductModalContent />
+                    <RejectProductModalContent 
+                    currentProduct={currentProduct}
+                    closeModal={() => setRejectProductModalVisible(false)}
+                     />
                 </RejectProductModal>
             </div>
         </div>
