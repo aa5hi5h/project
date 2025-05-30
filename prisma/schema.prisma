@@ -53,6 +53,7 @@ model User {
   accounts      Account[]
   sessions      Session[]
   products      Product[]
+  notifications Notification[]
   @@map("users")
 }
  
@@ -78,6 +79,7 @@ model Product {
   discord String
   categories Category[]
   images Image[]
+  notifications Notification[]
   user User @relation( fields: [userId] ,references: [id])
   userId String 
 
@@ -103,8 +105,36 @@ model Category {
   products Product[]
 }
 
+model Notification{
+  id String @id @default(cuid())
+  userId String
+  user User @relation(fields: [userId],references: [id])
+  body String
+  profilePicture String
+  productId String
+  commentId String?
+  product Product @relation(fields: [productId] , references: [id], onDelete: Cascade)
+  type NotificationType
+  status NotificationStatus @default(UNREAD)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+}
+
 enum Status {
   PENDING
   ACTIVE 
   REJECTED
+}
+
+enum NotificationType {
+ UPVOTE
+ COMMENT
+ ACTIVATED
+ REJECTED
+}
+
+enum NotificationStatus {
+  READ
+  UNREAD
 }
