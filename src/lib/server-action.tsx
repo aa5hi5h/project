@@ -287,3 +287,17 @@ export const rejectedProducts = async(productId:string, reason:string) => {
         }
     })
 }
+
+export const getActiveProducts = async() => {
+    const products = await db.product.findMany({
+        where:{
+            status: "ACTIVE"
+        },
+        include:{
+            images: true,
+            categories: true
+        }
+    })
+
+    return products
+}
