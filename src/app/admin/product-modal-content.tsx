@@ -1,3 +1,4 @@
+"use client"
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import ShareModal from "@/components/ui/modals/share-product-modal"
 import { Textarea } from "@headlessui/react"
@@ -6,7 +7,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { ShareModalContent } from "./share-product-modal"
-import { CommentOnProduct, deleteComment } from "@/lib/server-action"
+import { CommentOnProduct, deleteComment, upvoteProduct } from "@/lib/server-action"
 import { Badge } from "@/components/ui/badge"
 
 
@@ -67,6 +68,20 @@ const ProductModalContent: React.FC<ProductModalProps> = ({currentProduct,
             console.log(err)
         }
     }
+
+    const HandleUpvoteClick = async(e:React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+        e.stopPropagation()
+
+        try{
+            await upvoteProduct(currentProduct.id)
+            
+            setTotalUpvotes(hasUpvoted ? totalUpvotes - 1 : totalUpvotes + 1)
+            setHasUpvoted(!hasUpvoted)
+        }catch(err){
+            console.log(err)
+        }
+
+    }
     return (
         <div className="h-full">
             <div className="md:w-4/5 mx-auto">
@@ -90,7 +105,8 @@ const ProductModalContent: React.FC<ProductModalProps> = ({currentProduct,
                     <button className={`rounded-xl flex justify-center items-center p-4 gap-x-2 cursor-pointer
                         w-full lg:w-56 ${
                             hasUpvoted ? "bg-emerald-500" : "text-black border "
-                        }`}>
+                        }`}
+                        onClick={HandleUpvoteClick}>
                             <ArrowBigUp className={`${ hasUpvoted ? "text-white" : "text-black"}`} />
                     </button>
                     </div>

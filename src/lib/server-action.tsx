@@ -300,6 +300,11 @@ export const getActiveProducts = async() => {
                 include:{
                     user: true
                 }
+            },
+            upvotes:{
+                include:{
+                    user:true
+                }
             }
         }
     })
@@ -372,4 +377,65 @@ export const deleteComment = async(commentId: string) => {
         console.log(err)
         throw Error
     }
+}
+
+
+export const upvoteProduct = async(productId:string) => {
+
+    const authenticatedUser = await auth()
+
+    if(!authenticatedUser || !authenticatedUser.user || !authenticatedUser.user.id){
+        throw new Error("User ID is required !!!")
+    }
+
+    const userId = authenticatedUser.user.id 
+
+    const upvote = await db.upvote.findFirst({
+        where:{
+            productId,
+            userId
+        }
+    })
+
+    const profilePicture = authenticatedUser.user.image || ""
+
+    if(upvote){
+        await db.upvote.delete({
+            where:{
+               id: upvote.id
+            }
+        })
+    }else{
+        await db.upvote.create({
+            data:{
+                userId,
+                productId
+            }
+        })
+    }
+
+    const productOwner = await db.product.findUnique({
+        where:{
+            id:productId
+        },
+        include:{
+            user:true
+        }
+    })
+
+    if( productOwner && productOwner.userId !== userId){
+        await db.notification.create({
+            data:{
+                userId: productOwner.userId,
+                profilePicture,
+                productId,
+                body: `upvoted your product`,
+                type: "UPVOTE",
+                status: "UNREAD"
+            }
+        })
+    }
+
+    return true
+
 }

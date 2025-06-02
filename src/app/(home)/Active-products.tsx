@@ -28,7 +28,8 @@ export const ActiveProducts: React.FC<activeProductProps> = ({
             status,
             images,
             categories,
-            comments
+            comments,
+            upvotes
         } = product
 
         const imagesUrl = images.map((image:any) => image.url)
@@ -45,6 +46,10 @@ export const ActiveProducts: React.FC<activeProductProps> = ({
             userId : comment.user.id,
             name: comment.user.name.toLowerCase().replace(/\s/g,"_")
         })) : [] ;
+
+        const upvotesCount = upvotes ? upvotes.length : 0
+
+        const upvotesData = upvotes.map((upvote:any) => upvote.user.id)
 
         return {
              id,
@@ -64,7 +69,9 @@ export const ActiveProducts: React.FC<activeProductProps> = ({
             images: imagesUrl,
             categories: categoriesName,
             commentsLength : commentsCount,
-            commentsData: commentsData
+            commentsData: commentsData,
+            upvoter: upvotesData,
+            upvotes: upvotesCount
         }
     })
 

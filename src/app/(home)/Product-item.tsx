@@ -1,6 +1,6 @@
 "use client"
 import ProductModal from "@/components/ui/modals/product-modal"
-import { Forward, MessageCircle } from "lucide-react"
+import { ArrowBigUpDash, Forward, MessageCircle } from "lucide-react"
 import Image from "next/image"
 import { useSearchParams } from "next/navigation"
 import { useState } from "react"
@@ -8,6 +8,7 @@ import ProductModalContent from "../admin/product-modal-content"
 import Modal from "@/components/ui/modals/modal"
 import { AuthContent } from "@/components/navbar/auth-content"
 import Link from "next/link"
+import { upvoteProduct } from "@/lib/server-action"
 
 
 interface ProductItemProps{
@@ -22,6 +23,8 @@ export const ProductItem: React.FC<ProductItemProps> = ({product,authenticatedUs
     const [showLoginModal,setShowLoginModal] = useState<boolean>(false)
     const [showProductModal,setShowProductModal] = useState<boolean>(false)
     const [currentProduct,setCurrentProduct] = useState()
+    const [hasUpvoted,setHasUpvoted] = useState(product.upvoter?.includes(authenticatedUser?.user.id))
+    const [totalUpvotes,setTotalUpvotes] = useState(product.upvotes || "")
 
 
     const HandleArrowClick = (e:React.MouseEvent<HTMLDivElement,MouseEvent>) => {
@@ -55,6 +58,18 @@ export const ProductItem: React.FC<ProductItemProps> = ({product,authenticatedUs
         e.stopPropagation()
     }
 
+    const handleUpvoteClick = async(e: React.MouseEvent<HTMLDivElement , MouseEvent >) => {
+        e.stopPropagation()
+        try{
+            await upvoteProduct(product.id)
+
+            setTotalUpvotes( hasUpvoted ? totalUpvotes - 1 : totalUpvotes + 1 )
+            setHasUpvoted(!hasUpvoted)
+        }catch(err){
+            console.log(err)
+        }
+    }
+
     return (
         <div onClick={HandleProductClick} className="py-4 w-full cursor-pointer p-2">
             <div className="flex items-center justify-between">
@@ -79,9 +94,9 @@ export const ProductItem: React.FC<ProductItemProps> = ({product,authenticatedUs
                                 {product.commentsLength}
                                 <MessageCircle />
                             </div>
-                            {product.categories.map((category:any) => (
+                            {product.categories.map((category:any,idx:any) => (
                                 <div
-                                key={category.id}
+                                key={idx}
                                 className="text-xs text-gray-500"
                                 >
                                     <div className="flex gap-x-1 items-center">
@@ -105,6 +120,21 @@ export const ProductItem: React.FC<ProductItemProps> = ({product,authenticatedUs
                         </div>
                     </div>
                 </div>
+                <div className="text-sm ">
+                    <div onClick={handleUpvoteClick}>
+                        { hasUpvoted ? (
+                            <div className="border px-2 rounded-md flex flex-col items-center bg-red-500 text-white">
+                                <ArrowBigUpDash  />
+                                {totalUpvotes}
+                            </div>
+                        ) : (
+                            <div className="border px-2 rounded-md flex flex-col items-center ">
+                                <ArrowBigUpDash />
+                                {totalUpvotes}
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
             <ProductModal 
             visible={showProductModal}
@@ -113,6 +143,10 @@ export const ProductItem: React.FC<ProductItemProps> = ({product,authenticatedUs
                 <ProductModalContent
                 currentProduct={currentProduct}
                 authenticatedUser={authenticatedUser}
+                setHasUpvoted={setHasUpvoted}
+                setTotalUpvotes={setTotalUpvotes}
+                hasUpvoted={hasUpvoted}
+                totalUpvotes={totalUpvotes}
                  />
             </ProductModal>
             <Modal 
