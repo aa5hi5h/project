@@ -439,3 +439,53 @@ export const upvoteProduct = async(productId:string) => {
     return true
 
 }
+
+
+export const getNotifications = async() => {
+    const authenticatedUser = await auth()
+
+    if(!authenticatedUser || !authenticatedUser.user || !authenticatedUser.user.id){
+        throw new Error("You are not logged in ")
+    }
+
+    const userId = authenticatedUser.user.id
+
+    const notifications = await db.notification.findMany({
+        where: {
+            userId
+        },
+        orderBy:{
+            createdAt: "desc"
+        }
+    })
+
+    if(notifications.length === 0) {
+        return null
+    }
+
+    return notifications
+}
+
+
+export const markAllNotificationsAsRead = async() => {
+    try{
+        const authenticatedUser = await auth()
+
+        if(!authenticatedUser || !authenticatedUser.user || !authenticatedUser.user.id){
+            throw new Error("USer ID is missing or invalid ")
+        }
+
+        const userId = authenticatedUser.user.id;
+
+        await db.notification.updateMany({
+            where:{
+                userId
+            },
+            data:{
+                status: "READ"
+            }
+        })
+    }catch(err){
+        console.error("ERROR:::::",err)
+    }
+}

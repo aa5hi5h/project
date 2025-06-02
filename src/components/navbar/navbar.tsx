@@ -12,10 +12,11 @@ import { Notification } from "./notification"
 import { Submit } from "./submit"
 
 interface NavbarProp{
-    user: any
+    user: any,
+    notifications : any
 }
 
-const Navbar = ({user}:NavbarProp) => {
+const Navbar = ({user,notifications}:NavbarProp) => {
 
     const [authVisible,setAuthVisible] = useState<boolean>(false)
 
@@ -35,9 +36,9 @@ const Navbar = ({user}:NavbarProp) => {
             </div>
             {
                 user ? 
-                <div className="flex space-x-6">
+                <div className="flex items-center space-x-6">
                     <Submit />
-                    <Notification />
+                    <Notification notifications={notifications} />
                     <Avatar authenticatedUser={user} /></div> :
 
                 <div
