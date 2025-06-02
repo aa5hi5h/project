@@ -295,9 +295,81 @@ export const getActiveProducts = async() => {
         },
         include:{
             images: true,
-            categories: true
+            categories: true,
+            comments:{
+                include:{
+                    user: true
+                }
+            }
         }
     })
 
     return products
+}
+
+export const CommentOnProduct =  async(productId:string,commentText:string) => {
+     
+    const authenticatedUser = await auth()
+
+    if(!authenticatedUser || !authenticatedUser.user || !authenticatedUser.user.id){
+        throw new Error("You need to be authenticated to comment")
+    }
+
+    const userId = authenticatedUser.user.id
+
+    const profilePicture = authenticatedUser.user.image || ""
+
+    console.log("PROFILE_PICTURE::::",profilePicture)
+
+    await db.comment.create(
+        {
+            data: {
+                productId,
+                userId,
+                body : commentText,
+                profilePicture,
+            },
+            include:{
+                user: true,
+            }
+        }
+    )
+
+    const productDetails = await db.product.findUnique({
+        where:{
+            id:productId
+        },
+        include:{
+            user:true,
+        }
+    })
+
+    if ( productDetails && productDetails.userId !== userId){
+        await db.notification.create({
+            data:{
+                userId: productDetails.userId,
+                productId,
+                body: `comment on your porduct ${commentText}`,
+                profilePicture,
+                type: "COMMENT",
+                status: "UNREAD"
+            }
+        })
+    }
+
+}
+
+export const deleteComment = async(commentId: string) => {
+    try{
+        await db.comment.delete({
+            where:{
+                id:commentId
+            }
+        })
+        return true
+
+    }catch(err){
+        console.log(err)
+        throw Error
+    }
 }

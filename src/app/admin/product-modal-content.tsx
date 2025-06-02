@@ -1,11 +1,13 @@
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"
 import ShareModal from "@/components/ui/modals/share-product-modal"
 import { Textarea } from "@headlessui/react"
-import { ArrowBigUp, MessageCircleDashed, Share } from "lucide-react"
+import { ArrowBigUp, MessageCircleDashed, Share, Trash } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
 import { useState } from "react"
 import { ShareModalContent } from "./share-product-modal"
+import { CommentOnProduct, deleteComment } from "@/lib/server-action"
+import { Badge } from "@/components/ui/badge"
 
 
 interface ProductModalProps{
@@ -26,7 +28,45 @@ const ProductModalContent: React.FC<ProductModalProps> = ({currentProduct,
 }) => {
 
     const [shareModalVisible,setShareModalVisible] = useState<boolean>(false)
+    const [commentText,setCommentText] = useState<string>("")
+    const [comments,setComments] = useState(currentProduct.commentsData || [])
 
+    const HandleCommentSubmit = async() => {
+        try{
+            await CommentOnProduct(currentProduct.id,commentText)
+
+            setCommentText("")
+            setComments([
+                ...comments,
+                {
+                    user: authenticatedUser.user.name,
+                    body: commentText,
+                    profile: authenticatedUser.user.image,
+                    userId: authenticatedUser.user.id,
+                    timestamp: new Date().toISOString()
+                }
+            ])
+        }catch(error){
+            console.log(error)
+        }
+    }
+
+    const handleCommentChange = (e:any) => {
+        setCommentText(e.target.value)
+    }
+
+    console.log("PROFILE_PICTURE::::",comments.map((comment:any) => comment.profilePicture))
+
+
+    const handleCommentDelete = async(commentId: string) => {
+        try{
+            await deleteComment(commentId)
+
+            setComments(comments.filter((comment:any) => comment.id !== commentId))
+        }catch(err){
+            console.log(err)
+        }
+    }
     return (
         <div className="h-full">
             <div className="md:w-4/5 mx-auto">
@@ -105,14 +145,50 @@ const ProductModalContent: React.FC<ProductModalProps> = ({currentProduct,
                         height={50}
                         className="rounded-full h-12 w-12" />
                         <Textarea 
+                        value={commentText}
+                        onChange={handleCommentChange}
                         placeholder="What do you think about this product?"
                         className="w-full border rounded-md focus:outline-none p-4 text-gray-500 "/>
                     </div>
                     <div className="flex justify-end mt-4">
-                        <button className="bg-red-500 text-white p-2 rounded-xl">
+                        <button onClick={HandleCommentSubmit} className="bg-red-500 text-white p-2 rounded-xl">
                             Comment
                         </button>
                     </div>
+                </div>
+                <div className="py-8 space-y-8">
+                    {comments.map((comment:any,idx:any) => (
+                        <div key={idx} className="flex gap-4">
+                            <Image
+                            src={comment.profile}
+                            alt="profile picture"
+                            width={50}
+                            height={50}
+                            className="w-8 h-8 rounded-full mt-1 cursor-pointer" />
+                            <div className="w-full">
+                                <div className="flex justify-between items-center">
+                                    <div className="flex gap-x-2 items-center">
+                                        <h1 className="text-gray-600 font-semibold">{comment.user}</h1>
+                                        { comment.userID === currentProduct.userId && (
+                                            <Badge className="bg-blue-300">Creator</Badge>
+                                        )}
+                                        <div className="text-gray-500 text-xs">
+                                            {new Date(comment.timestamp).toDateString()}
+                                        </div>
+                                        {(comment.userId === authenticatedUser.user.id || 
+                                        currentProduct.userId === authenticatedUser.user.id) && (
+                                            <Trash 
+                                            onClick={() => handleCommentDelete(comment.id)}
+                                            className="text-red-500 cursor-pointer" />
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="text-gray-600 text-sm hover:cursor-pointer mt-2">
+                                        {comment.body}
+                                    </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
             </div>
